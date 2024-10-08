@@ -1,3 +1,6 @@
+* {
+  box-sizing: border-box;
+}
 body {
   font-family: Arial, sans-serif;
   background-color: #f4f4f9;
@@ -77,6 +80,7 @@ button:hover {
   max-height: 600px;
   border-top: 1px solid #ccc;
   padding-top: 10px;
+  width: 100%;
 }
 .add-duties {
   margin-bottom: 20px;
@@ -129,6 +133,7 @@ button:hover {
   margin-bottom: 10px;
   border-radius: 8px;
   background: #fafafa;
+  width: 100%;
 }
 
 .duty.ongoing {
@@ -149,6 +154,7 @@ button:hover {
   border-radius: 8px;
   padding: 16px;
   margin: 16px 0;
+  width: 100%;
 }
 
 #statistics p {
