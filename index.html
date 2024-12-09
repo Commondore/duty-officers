@@ -13,20 +13,22 @@
   <h1>Приложение для выбора дежурных</h1>
 
   <div class="container">
-    <div class="add-duties">
-      <button onclick="selectDuties()">
-        Выбрать случайных дежурных (мин. 3)
-      </button>
-      <button onclick="logout()">Выйти</button>
-    </div>
+    <header class="header">
+      <div class="add-duties">
+        <button onclick="selectDuties()">
+          Выбрать случайных дежурных (мин. 3)
+        </button>
+        <button onclick="logout()">Выйти</button>
+      </div>
+      <div id="statistics">
+        <p id="totalDutyCount"><span>Всего дежурных:</span> 0</p>
+        <p id="ongoingDutyCount"><span>Текущие дежурства:</span> 0</p>
+        <p id="completedDutyCount"><span>Завершенные дежурства:</span> 0</p>
+        <p id="skippedDutyCount"><span>Сбежавшие дежурства:</span> 0</p>
+        <p id="lastResetDate"><span>Последнее обновление статистики:</span></p>
+      </div>
 
-    <div id="statistics">
-      <p id="totalDutyCount"><span>Всего дежурных:</span> 0</p>
-      <p id="ongoingDutyCount"><span>Текущие дежурства:</span> 0</p>
-      <p id="completedDutyCount"><span>Завершенные дежурства:</span> 0</p>
-      <p id="skippedDutyCount"><span>Сбежавшие дежурства:</span> 0</p>
-      <p id="lastResetDate"><span>Последнее обновление статистики:</span></p>
-    </div>
+    </header>
 
     <div class="flex">
       <div class="dutyList">

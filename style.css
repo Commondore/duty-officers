@@ -61,6 +61,17 @@ button:hover {
   display: grid;
   gap: 20px;
 }
+
+.header {
+  display: flex;
+  gap: 40px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+
 .duty-container {
   display: flex;
   flex-direction: column;
@@ -75,7 +86,6 @@ button:hover {
 #completedDutyList,
 #currentDutyList,
 #skippedDutyList {
-  margin-bottom: 20px;
   overflow-y: auto;
   max-height: 600px;
   border-top: 1px solid #ccc;
@@ -83,9 +93,9 @@ button:hover {
   width: 100%;
 }
 .add-duties {
-  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 10px;
 }
 .add-duties button {
@@ -153,8 +163,6 @@ button:hover {
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 16px;
-  margin: 16px 0;
-  width: 100%;
 }
 
 #statistics p {

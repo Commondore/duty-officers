@@ -20,7 +20,6 @@ async function fecthDutyList() {
       return {
         name: fio,
         count: 0,
-        weeklyCount: 0,
         status: "",
         dutyDates: [],
       };
@@ -44,23 +43,22 @@ function displayDutyList() {
     const buttonsHtml =
       duty.status === "ongoing"
         ? `
-      <div>
-        <button onclick="markAsAddet(${index})"><i class="fas fa-plus"></i></button>
         <button onclick="markAsCompleted(${index})"><i class="fas fa-check"></i></button>
         <button onclick="markAsSkipped(${index})"><i class="fas fa-times"></i></button>
         <button onclick="cancelDuty(${index})"><i class="fas fa-ban"></i></button>
-      </div>
-    `
-        : `
-      <div>
+      `
+        : duty.status === "skipped"
+        ? `
         <button onclick="markAsAddet(${index})"><i class="fas fa-plus"></i></button>
-        <button onclick="markAsCompleted(${index})"><i class="fas fa-check"></i></button>
-      </div>
-    `;
+        <button onclick="cancelDuty(${index})"><i class="fas fa-ban"></i></button>
+        `
+        : `
+        <button onclick="markAsAddet(${index})"><i class="fas fa-plus"></i></button>
+      `;
 
     const dutyHtml = `
       <div class="duty ${duty.status}">
-        <span>${duty.name} - Всего: ${duty.count} (неделя: ${duty.weeklyCount})</span>
+        <span>${duty.name} - Всего: ${duty.count}</span>
         <div class="dates">Даты дежурств: ${dutyDates}</div>
         <div class="buttons">
           ${buttonsHtml}
@@ -87,7 +85,9 @@ function updateStatistics() {
   const completedCount = dutyList.filter((d) => d.status === "completed").length;
   const skippedCount = dutyList.filter((d) => d.status === "skipped").length;
 
-  document.getElementById("totalDutyCount").innerText = `Всего дежурных: ${dutyList.length}`;
+  document.getElementById("totalDutyCount").innerText = `Всего дежурных: ${
+    dutyList.length - ongoingCount - completedCount - skippedCount
+  }`;
   document.getElementById("ongoingDutyCount").innerText = `Текущие дежурства: ${ongoingCount}`;
   document.getElementById(
     "completedDutyCount"
@@ -106,15 +106,16 @@ function markAsAddet(index) {
     return;
   }
 
+  if (duty.status !== "skipped") {
+    duty.count++;
+  }
+
   duty.status = "ongoing";
-  duty.count++;
-  duty.weeklyCount++;
   duty.dutyDates.push(new Date().toLocaleDateString());
 
   currentDutyList.push({
     name: duty.name,
     count: duty.count,
-    weeklyCount: duty.weeklyCount,
     dutyDates: [...duty.dutyDates],
   });
 
@@ -156,7 +157,6 @@ function cancelDuty(index) {
 
   duty.status = "";
   duty.count--;
-  duty.weeklyCount--;
   duty.dutyDates.pop();
 
   saveToLocalStorage();
