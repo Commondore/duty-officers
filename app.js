@@ -1,31 +1,125 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+import {
+  getDatabase,
+  ref,
+  set,
+  get,
+} from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAYnqGVu-3oemsn-gvx3zT_GhXfo09g3bU",
+  authDomain: "duty-7bbf3.firebaseapp.com",
+  databaseURL: "https://duty-7bbf3-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "duty-7bbf3",
+  storageBucket: "duty-7bbf3.firebasestorage.app",
+  messagingSenderId: "125339319944",
+  appId: "1:125339319944:web:2d9d3a61d4800ecd8ea93d",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const db = getDatabase(app);
+
 let dutyList = [];
-document.addEventListener("DOMContentLoaded", async () => {
-  if (!localStorage.getItem("isLoggedIn")) {
-    window.location.href = "login.html";
-  } else {
-    await fecthDutyList();
-    displayDutyList();
+let currentDutyList = [];
+
+async function login(event) {
+  event.preventDefault();
+
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+
+  try {
+    await signInWithEmailAndPassword(auth, username, password);
+
+    localStorage.setItem("isLoggedIn", "true");
+    window.location.href = "index.html";
+  } catch (error) {
+    alert("Ошибка авторизации: " + error.message);
+  }
+}
+const loginForm = document.getElementById("login");
+if (loginForm) {
+  loginForm.addEventListener("submit", login);
+}
+
+async function saveDutyToFirebase() {
+  showLoader();
+  try {
+    await set(ref(db, "duties/"), {
+      dutyList: dutyList,
+      currentDutyList: currentDutyList,
+    });
+    console.log("Данные успешно сохранены в Firebase.");
+  } catch (error) {
+    console.error("Ошибка при сохранении данных в Firebase: ", error);
+  } finally {
+    hideLoader();
+  }
+}
+
+async function checkDutyList() {
+  try {
+    const snapshot = await get(ref(db, "duties"));
+    if (!snapshot.exists() || snapshot.val().length === 0) {
+      if (!window.location.href.includes("add-fio.html")) {
+        window.location.href = "add-fio.html";
+      }
+    }
+  } catch (error) {
+    console.error("Ошибка при получении списка дежурных: ", error);
+  }
+}
+
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    if (!window.location.href.includes("login.html")) {
+      window.location.href = "login.html";
+    }
+    return;
+  }
+
+  try {
+    await checkDutyList();
+  } catch (error) {
+    console.error("Ошибка при проверке списка дежурных: ", error);
   }
 });
 
-let currentDutyList = JSON.parse(localStorage.getItem("currentDutyList")) || [];
+async function loadDutyList() {
+  showLoader();
+  try {
+    const snapshot = await get(ref(db, "duties/"));
 
-async function fecthDutyList() {
-  const data = JSON.parse(localStorage.getItem("dutyList"));
-  if (data) {
-    dutyList = data;
-  } else {
-    const dutyListNames = await fetch("data.json").then((res) => res.json());
-    dutyList = dutyListNames.map((fio) => {
-      return {
-        name: fio,
-        count: 0,
-        status: "",
-        dutyDates: [],
-      };
-    });
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+
+      dutyList = data.dutyList || [];
+      currentDutyList = data.currentDutyList || [];
+      console.log("Данные успешно загружены из Firebase.");
+
+      displayDutyList();
+    } else {
+      console.log("Данные в Firebase отсутствуют.");
+    }
+  } catch (error) {
+    console.error("Ошибка при загрузке данных из Firebase: ", error);
+  } finally {
+    hideLoader();
   }
 }
+
+document.addEventListener("DOMContentLoaded", async () => {
+  if (document.body.id === "main") {
+    await loadDutyList();
+  }
+});
 
 function displayDutyList() {
   const dutyListDiv = document.getElementById("dutyList");
@@ -39,7 +133,8 @@ function displayDutyList() {
   currentDutyListDiv.innerHTML = "";
 
   dutyList.forEach((duty, index) => {
-    const dutyDates = duty.dutyDates.length > 0 ? duty.dutyDates.join(", ") : "нет";
+    const dutyDates =
+      duty.dutyDates && duty.dutyDates.length > 0 ? duty.dutyDates.join(", ") : "нет";
     const buttonsHtml =
       duty.status === "ongoing"
         ? `
@@ -98,70 +193,110 @@ function updateStatistics() {
   ).innerText = `Последнее обновление статистики: ${new Date().toLocaleDateString()}`;
 }
 
-function markAsAddet(index) {
-  const duty = dutyList[index];
+async function markAsAddet(index) {
+  showLoader();
 
-  if (currentDutyList.some((d) => d.name === duty.name)) {
-    alert("Этот дежурный уже в текущем дежурстве.");
-    return;
+  try {
+    const duty = dutyList[index];
+
+    if (currentDutyList.some((d) => d.name === duty.name)) {
+      alert("Этот дежурный уже в текущем дежурстве.");
+      return;
+    }
+
+    if (duty.status !== "skipped") {
+      duty.count++;
+    }
+
+    duty.status = "ongoing";
+    if (duty.dutyDates) {
+      duty.dutyDates.push(new Date().toLocaleDateString());
+    } else {
+      duty.dutyDates = [new Date().toLocaleDateString()];
+    }
+
+    currentDutyList.push({
+      name: duty.name,
+      count: duty.count,
+      dutyDates: [...duty.dutyDates],
+    });
+
+    await saveDutyToFirebase();
+    displayDutyList();
+  } catch (error) {
+    console.error("Ошибка при добавлении дежурного: ", error);
+  } finally {
+    hideLoader();
   }
-
-  if (duty.status !== "skipped") {
-    duty.count++;
-  }
-
-  duty.status = "ongoing";
-  duty.dutyDates.push(new Date().toLocaleDateString());
-
-  currentDutyList.push({
-    name: duty.name,
-    count: duty.count,
-    dutyDates: [...duty.dutyDates],
-  });
-
-  saveToLocalStorage();
-  displayDutyList();
 }
+window.markAsAddet = markAsAddet;
 
-function markAsCompleted(index) {
-  const duty = dutyList[index];
-  if (duty.status !== "ongoing") {
-    alert("Этот дежурный не может быть завершен.");
-    return;
-  }
+async function markAsCompleted(index) {
+  showLoader();
 
-  duty.status = "completed";
-  currentDutyList = currentDutyList.filter((d) => d.name !== duty.name);
-  saveToLocalStorage();
-  displayDutyList();
-}
+  try {
+    const duty = dutyList[index];
+    if (duty.status !== "ongoing") {
+      alert("Этот дежурный не может быть завершен.");
+      return;
+    }
 
-function markAsSkipped(index) {
-  const duty = dutyList[index];
-  if (duty.status !== "ongoing") {
-    alert("Этот дежурный не может быть отмечен как сбежавший.");
-    return;
-  }
-
-  duty.status = "skipped";
-  currentDutyList = currentDutyList.filter((d) => d.name !== duty.name);
-  saveToLocalStorage();
-  displayDutyList();
-}
-
-function cancelDuty(index) {
-  const duty = dutyList[index];
-  if (duty.status === "ongoing") {
+    duty.status = "completed";
     currentDutyList = currentDutyList.filter((d) => d.name !== duty.name);
+    await saveDutyToFirebase();
+    displayDutyList();
+  } catch (error) {
+    console.error("Ошибка при обновлении дежурного: ", error);
+  } finally {
+    hideLoader();
   }
-
-  duty.status = "";
-  duty.count--;
-  duty.dutyDates.pop();
-
-  saveToLocalStorage();
-  displayDutyList();
 }
+window.markAsCompleted = markAsCompleted;
+
+async function markAsSkipped(index) {
+  showLoader();
+
+  try {
+    const duty = dutyList[index];
+    if (duty.status !== "ongoing") {
+      alert("Этот дежурный не может быть отмечен как сбежавший.");
+      return;
+    }
+
+    duty.status = "skipped";
+    currentDutyList = currentDutyList.filter((d) => d.name !== duty.name);
+    await saveDutyToFirebase();
+    displayDutyList();
+  } catch (error) {
+    console.error("Ошибка при сбросе дежурного: ", error);
+  } finally {
+    hideLoader();
+  }
+}
+window.markAsSkipped = markAsSkipped;
+
+async function cancelDuty(index) {
+  showLoader();
+
+  try {
+    const duty = dutyList[index];
+    if (duty.status === "ongoing") {
+      currentDutyList = currentDutyList.filter((d) => d.name !== duty.name);
+    }
+
+    duty.status = "";
+    duty.count--;
+    duty.dutyDates.pop();
+
+    await saveDutyToFirebase();
+    displayDutyList();
+  } catch (error) {
+    console.error("Ошибка при отмене дежурного: ", error);
+  } finally {
+    hideLoader();
+  }
+}
+window.cancelDuty = cancelDuty;
 
 function selectDuties() {
   const eligibleDuties = dutyList.filter((duty) => duty.status === "");
@@ -182,12 +317,63 @@ function selectDuties() {
   selectedDuties.forEach((duty) => markAsAddet(dutyList.indexOf(duty)));
 }
 
-function saveToLocalStorage() {
-  localStorage.setItem("dutyList", JSON.stringify(dutyList));
-  localStorage.setItem("currentDutyList", JSON.stringify(currentDutyList));
+function logout() {
+  signOut(auth)
+    .then(() => {
+      localStorage.removeItem("isLoggedIn");
+      window.location.href = "login.html";
+    })
+    .catch((error) => {
+      console.error("Ошибка выхода: ", error);
+    });
 }
 
-function logout() {
-  localStorage.removeItem("isLoggedIn");
-  window.location.href = "login.html";
+const addFio = async (event) => {
+  event.preventDefault();
+  const fioList = document
+    .getElementById("fioList")
+    .value.split("\n")
+    .map((fio) => fio.trim())
+    .filter((fio) => fio.length > 0);
+
+  if (fioList.length === 0) {
+    alert("Список не может быть пустым");
+    return;
+  }
+
+  try {
+    await set(ref(db, "duties/"), {
+      dutyList: fioList.map((fio) => ({ name: fio, count: 0, status: "", dutyDates: [] })),
+      currentDutyList: [],
+    });
+    alert("Список ФИО успешно сохранен!");
+    window.location.href = "index.html"; // Редирект на главную страницу
+  } catch (error) {
+    console.error("Ошибка при сохранении данных: ", error);
+    alert("Не удалось сохранить данные. Попробуйте снова.");
+  }
+};
+const fioForm = document.getElementById("fioForm");
+if (fioForm) {
+  fioForm.addEventListener("submit", addFio);
+}
+
+const logoutButton = document.getElementById("logout");
+if (logoutButton) {
+  logoutButton.addEventListener("click", logout);
+}
+const selectDutiesButton = document.getElementById("selectDuties");
+
+if (selectDutiesButton) {
+  selectDutiesButton.addEventListener("click", selectDuties);
+}
+
+function showLoader() {
+  const loader = document.getElementById("loader");
+  if (loader) loader.classList.remove("hidden");
+}
+
+function hideLoader() {
+  const loader = document.getElementById("loader");
+  if (loader) loader.classList.add("hidden");
 }

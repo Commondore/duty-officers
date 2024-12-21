@@ -4,21 +4,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <link rel="stylesheet" href="all.min.css" />
   <link rel="stylesheet" href="style.css" />
   <title>Приложение для выбора дежурных</title>
 </head>
 
-<body>
+<body id="main">
   <h1>Приложение для выбора дежурных</h1>
 
   <div class="container">
     <header class="header">
       <div class="add-duties">
-        <button onclick="selectDuties()">
+        <button id="selectDuties">
           Выбрать случайных дежурных (мин. 3)
         </button>
-        <button onclick="logout()">Выйти</button>
+        <button id="logout">Выйти</button>
       </div>
       <div id="statistics">
         <p id="totalDutyCount"><span>Всего дежурных:</span> 0</p>
@@ -51,7 +52,12 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <div id="loader" class="loader hidden">
+    <div class="spinner"></div>
+  </div>
+
+
+  <script src="app.js" type="module"></script>
 </body>
 
 </html>
