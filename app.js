@@ -10,16 +10,7 @@ import {
   set,
   get,
 } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAYnqGVu-3oemsn-gvx3zT_GhXfo09g3bU",
-  authDomain: "duty-7bbf3.firebaseapp.com",
-  databaseURL: "https://duty-7bbf3-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "duty-7bbf3",
-  storageBucket: "duty-7bbf3.firebasestorage.app",
-  messagingSenderId: "125339319944",
-  appId: "1:125339319944:web:2d9d3a61d4800ecd8ea93d",
-};
+import { firebaseConfig } from "./firebaseConfig.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
