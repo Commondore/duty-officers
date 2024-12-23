@@ -23,6 +23,3 @@ jobs:
             messagingSenderId: '${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}',
             appId: '${{ secrets.FIREBASE_APP_ID }}',
           };" > ./firebaseConfig.js
-
-      - name: Deploy or build project
-        run: npm run build
