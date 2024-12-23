@@ -129,17 +129,41 @@ function displayDutyList() {
     const buttonsHtml =
       duty.status === "ongoing"
         ? `
-        <button onclick="markAsCompleted(${index})"><i class="fas fa-check"></i></button>
-        <button onclick="markAsSkipped(${index})"><i class="fas fa-times"></i></button>
-        <button onclick="cancelDuty(${index})"><i class="fas fa-ban"></i></button>
+        <button onclick="markAsCompleted(${index})">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+          </svg>
+        </button>
+        <button onclick="markAsSkipped(${index})">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <button onclick="cancelDuty(${index})">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
+          </svg>
+        </button>
       `
         : duty.status === "skipped"
         ? `
-        <button onclick="markAsAddet(${index})"><i class="fas fa-plus"></i></button>
-        <button onclick="cancelDuty(${index})"><i class="fas fa-ban"></i></button>
+        <button onclick="markAsAddet(${index})">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+        </button>
+        <button onclick="cancelDuty(${index})">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
+          </svg>
+        </button>
         `
         : `
-        <button onclick="markAsAddet(${index})"><i class="fas fa-plus"></i></button>
+        <button onclick="markAsAddet(${index})">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+        </button>
       `;
 
     const dutyHtml = `
