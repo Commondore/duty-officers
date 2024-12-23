@@ -24,11 +24,13 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
 }
 button svg {
   width: 18px;
   height: 18px;
   color: white;
+  stroke-width: 2;
 }
 .check {
   background: #35af56;

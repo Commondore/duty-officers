@@ -130,16 +130,19 @@ function displayDutyList() {
       duty.status === "ongoing"
         ? `
         <button class="check" onclick="markAsCompleted(${index})">
+          Выполнил
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
           </svg>
         </button>
         <button class="skip" onclick="markAsSkipped(${index})">
+          Сбежал
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
           </svg>
         </button>
         <button class="cancel" onclick="cancelDuty(${index})">
+          Сбросить
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
           </svg>
@@ -148,11 +151,13 @@ function displayDutyList() {
         : duty.status === "skipped"
         ? `
         <button onclick="markAsAddet(${index})">
+          Добавить
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
         </button>
         <button class="cancel" onclick="cancelDuty(${index})">
+          Сбросить
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
           </svg>
@@ -160,6 +165,7 @@ function displayDutyList() {
         `
         : `
         <button onclick="markAsAddet(${index})">
+          Добавить
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
@@ -258,6 +264,12 @@ async function markAsCompleted(index) {
 
     duty.status = "completed";
     currentDutyList = currentDutyList.filter((d) => d.name !== duty.name);
+
+    const completedCount = dutyList.filter((d) => d.status === "completed").length;
+    if (completedCount === dutyList.length) {
+      dutyList = dutyList.map((item) => ({ ...item, status: "" }));
+    }
+
     await saveDutyToFirebase();
     displayDutyList();
   } catch (error) {
