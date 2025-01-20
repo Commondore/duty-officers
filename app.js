@@ -248,7 +248,7 @@ async function markAsAddet(index, isLatecomer) {
     if (isLatecomer) {
       duty.status = "latecomer";
       duty.dutyDates = duty.dutyDates ? [...duty.dutyDates] : [];
-      duty.dutyLate++;
+      duty.dutyLate = duty.dutyLate || duty.dutyLate === 0 ? duty.dutyLate + 1 : 0;
     } else {
       duty.status = "ongoing";
       if (duty.dutyDates) {
