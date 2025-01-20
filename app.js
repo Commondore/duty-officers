@@ -313,7 +313,7 @@ async function markAsSkipped(index) {
 
   try {
     const duty = dutyList[index];
-    if (duty.status !== "ongoing") {
+    if (duty.status !== "latecomer" && duty.status !== "ongoing") {
       alert("Этот дежурный не может быть отмечен как сбежавший.");
       return;
     }
